@@ -9,17 +9,17 @@ const app = new Hono<{
     JWT_SECRET: string
   }
 }>()
+app.get('/posts', async(c) => {
+  const prisma = getPrisma(c.env.DATABASE_URL)
+  const data = await prisma.posts.findMany({})
+  return c.json(data)
+})
 app.use("v1/*", async(c, next)=>{
   const header = c.req.header("authorization")||"";
   const response = await verify(header, "secret")
   if(response?.id)
   await next()
   return c.json({error:"unauthorised"})
-})
-app.get('/v1/posts', async(c) => {
-  const prisma = getPrisma(c.env.DATABASE_URL)
-  const data = await prisma.posts.findMany({})
-  return c.json(data)
 })
 app.post("/signin", async(c)=>{
    const prisma = getPrisma(c.env.DATABASE_URL)
